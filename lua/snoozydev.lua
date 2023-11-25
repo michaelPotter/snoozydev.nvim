@@ -15,6 +15,9 @@ M = {
 	default_config = {
 		enabled = true,
 	},
+	state = {
+		has_warned = {},
+	},
 }
 vim.api.nvim_create_augroup(augroup_name, { clear = true })
 
@@ -42,12 +45,22 @@ function M.__hook_plugin(plugin_spec)
 			vim.cmd(":Lazy reload " .. plugin_spec.name)
 
 			-- Try to guess the module name
-			local modName = plugin_spec.name:gsub(".nvim$", "")
+			local modName = "foo" -- plugin_spec.name:gsub(".nvim$", "")
 
 			-- Run the plugin's devhook function if found
-			pcall(function()
-				require(modName).devhook()
-			end)
+			local status, mod = pcall(require, modName)
+			if status then
+				if mod.devhook then
+					mod.devhook()
+				end
+			else
+				-- vim.notify(vim.inspect(require("snoozydev").state))
+				-- Warn the user that we couldn't run the devhook, but only once
+				if not require("snoozydev").state.has_warned[modName] then
+					vim.notify("Warning: Could not run devhook:\nCould not require('" .. modName .. "') for plugin " .. plugin_spec.name, vim.log.levels.WARN, {title = "snoozydev.nvim"})
+					require("snoozydev").state.has_warned[modName] = true
+				end
+			end
 		end,
 	})
 end
