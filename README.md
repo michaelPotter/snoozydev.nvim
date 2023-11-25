@@ -38,10 +38,26 @@ from the plugin name, it won't work. E.g. if your plugin name is "foobar" or "fo
 ``` lua
 M = {}
 
--- ... your main plugin code here ...
+-- Pretend this is a plugin that actually does something...
+function M.do_a_thing()
+	vim.notify("Doing the thing")
+end
 
+-- This will be called whenever you modify your plugin code.
 function M.devhook()
--- TODO add sample maps
+	-- Set up a "development keybind" like this
+	vim.api.nvim_set_keymap("n", "<leader>d1", ":lua require('yourplugin').do_a_thing()<cr>", {})
+	-- ... or like this ...
+	vim.api.nvim_set_keymap("n", "<leader>d2", "", {
+		callback = function()
+			require("yourplugin").do_a_thing({with = "some args"})
+		end
+	})
+	-- ... or just run your plugin if you want ...
+	require("yourplugin").do_a_thing()
+	-- ... you can probaby run a locally defined function directly, but I can't promise nothing weird will happen  ...
+	M.do_a_thing()
+	do_a_local_thing()
 end
 
 return M
