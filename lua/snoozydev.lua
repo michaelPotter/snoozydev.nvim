@@ -45,7 +45,7 @@ function M.__hook_plugin(plugin_spec)
 			vim.cmd(":Lazy reload " .. plugin_spec.name)
 
 			-- Try to guess the module name
-			local modName = "foo" -- plugin_spec.name:gsub(".nvim$", "")
+			local modName = plugin_spec.name:gsub(".nvim$", "")
 
 			-- Run the plugin's devhook function if found
 			local status, mod = pcall(require, modName)
