@@ -34,6 +34,20 @@ function M.setup(config)
 	end
 end
 
+local function require_module(modName, callback)
+	local status, mod = pcall(require, modName)
+	if status then
+		callback(mod)
+	else
+		-- vim.notify(vim.inspect(require("snoozydev").state))
+		-- Warn the user that we couldn't run the devhook, but only once
+		if not require("snoozydev").state.has_warned[modName] then
+			vim.notify("Warning: Could not run devhook:\nCould not require('" .. modName .. "') for plugin " .. plugin_spec.name, vim.log.levels.WARN, {title = "snoozydev.nvim"})
+			require("snoozydev").state.has_warned[modName] = true
+		end
+	end
+end
+
 -- Register the hook for a single plugin
 function M.__hook_plugin(plugin_spec)
 	-- vim.notify("hooking " .. plugin_spec.name)
@@ -42,25 +56,26 @@ function M.__hook_plugin(plugin_spec)
 		pattern = { plugin_spec.dir .. "/*" }, --  TODO check if this works right recursively
 		desc = "Automatically reload dev plugin " .. plugin_spec.name .. " on edit.",
 		callback = function(cbtbl)
-			vim.cmd(":Lazy reload " .. plugin_spec.name)
-
 			-- Try to guess the module name
 			local modName = plugin_spec.name:gsub(".nvim$", "")
 
+			-- Run the plugin's pre-reload devhook function if found
+			-- TODO maybe think of a better name for the hook than "devhook_pre_reload"
+			require_module(modName, function(mod)
+				if mod.devhook_pre_reload then
+					mod.devhook_pre_reload()
+				end
+			end)
+
+			-- Reload the plugin
+			vim.cmd(":Lazy reload " .. plugin_spec.name)
+
 			-- Run the plugin's devhook function if found
-			local status, mod = pcall(require, modName)
-			if status then
+			require_module(modName, function(mod)
 				if mod.devhook then
 					mod.devhook()
 				end
-			else
-				-- vim.notify(vim.inspect(require("snoozydev").state))
-				-- Warn the user that we couldn't run the devhook, but only once
-				if not require("snoozydev").state.has_warned[modName] then
-					vim.notify("Warning: Could not run devhook:\nCould not require('" .. modName .. "') for plugin " .. plugin_spec.name, vim.log.levels.WARN, {title = "snoozydev.nvim"})
-					require("snoozydev").state.has_warned[modName] = true
-				end
-			end
+			end)
 		end,
 	})
 end
