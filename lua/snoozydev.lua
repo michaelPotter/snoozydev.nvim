@@ -11,7 +11,7 @@ local augroup_name = "snoozydev"
 --   Features:
 --     * Run the devhook as soon as you start editing a plugin?
 
-M = {
+local M = {
 	default_config = {
 		enabled = true,
 	},
