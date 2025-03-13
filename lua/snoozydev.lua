@@ -34,7 +34,7 @@ function M.setup(config)
 	end
 end
 
-local function require_module(modName, callback)
+local function require_module(plugin_spec, modName, callback)
 	local status, mod = pcall(require, modName)
 	if status then
 		callback(mod)
@@ -61,7 +61,7 @@ function M.__hook_plugin(plugin_spec)
 
 			-- Run the plugin's pre-reload devhook function if found
 			-- TODO maybe think of a better name for the hook than "devhook_pre_reload"
-			require_module(modName, function(mod)
+			require_module(plugin_spec, modName, function(mod)
 				if mod.devhook_pre_reload then
 					mod.devhook_pre_reload()
 				end
@@ -71,7 +71,7 @@ function M.__hook_plugin(plugin_spec)
 			vim.cmd(":Lazy reload " .. plugin_spec.name)
 
 			-- Run the plugin's devhook function if found
-			require_module(modName, function(mod)
+			require_module(plugin_spec, modName, function(mod)
 				if mod.devhook then
 					mod.devhook()
 				end
