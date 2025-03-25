@@ -39,11 +39,12 @@ local function require_module(plugin_spec, modName, callback)
 	if status then
 		callback(mod)
 	else
+		local state = require('snoozydev').state
 		-- vim.notify(vim.inspect(require("snoozydev").state))
 		-- Warn the user that we couldn't run the devhook, but only once
-		if not require("snoozydev").state.has_warned[modName] then
+		if not state.has_warned[modName] then
 			vim.notify("Warning: Could not run devhook:\nCould not require('" .. modName .. "') for plugin " .. plugin_spec.name, vim.log.levels.WARN, {title = "snoozydev.nvim"})
-			require("snoozydev").state.has_warned[modName] = true
+			state.has_warned[modName] = true
 		end
 	end
 end
