@@ -66,6 +66,9 @@ function M.__hook_plugin(plugin_spec)
 				if mod.devhook_pre_reload then
 					mod.devhook_pre_reload()
 				end
+				if mod.devhook_cleanup then
+					mod.devhook_cleanup()
+				end
 			end)
 
 			-- Reload the plugin

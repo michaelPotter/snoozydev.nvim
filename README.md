@@ -3,8 +3,10 @@ A "plugin" for the Lazy package manager that automatically reloads your dev plug
 # Features
 
 - Any plugins marked `dev = true` in your lazy config will be automatically reloaded as you edit them.
+- NOTE: your plugin's main module MUST be named the same as the plugin (an .nvim extension is not required on the module name).
 - If your plugin exports a function called `devhook` on its root module, that function will be called on every reload.
   This is useful for setting up "development only" keybinds or settings.
+- If your plugin exports a function called `devhook_cleanup`, it will be called before being reloaded. Helpful for e.g. clearing autocmds or persisting state across reloads.
 
 # Setup
 
